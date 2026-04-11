@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SEO Automation Command Center
 
 A production-grade AI-powered SEO automation system built with python, n8n, Docker, and GPT 4.
@@ -11,3 +12,7 @@ A production-grade AI-powered SEO automation system built with python, n8n, Dock
 
 ## Tech Stack
 Python | n8n | Docker | OpenAI GPT-4 | WordPress API | BigQuery | Google Search Console
+=======
+# seo-automation-command-center
+Production-grade AI-powered SEO automation system with 5 modules.
+>>>>>>> 51e985b591ef7e12a0786faa0ba6253b2eb8a881
