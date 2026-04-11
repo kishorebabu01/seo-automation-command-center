@@ -10,4 +10,4 @@ A production-grade AI-powered SEO automation system built with python, n8n, Dock
 - Module 5 : Live SEO Dashboard
 
 ## Tech Stack
-Python | n8n | Docker | OpenAI GPT-4 | WordPress API | BigQuery | Google Search Console API.
+Python | n8n | Docker | OpenAI GPT-4 | WordPress API | BigQuery | Google Search Console
