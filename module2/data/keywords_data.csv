@@ -1,0 +1,28 @@
+service,city,state,population,avg_price,competition_level
+Web Design,Chennai,Tamil Nadu,7088000,15000,High
+Web Design,Mumbai,Maharashtra,20667656,25000,High
+Web Design,Delhi,Delhi,16787941,20000,High
+Web Design,Bangalore,Karnataka,8443675,22000,High
+Web Design,Hyderabad,Telangana,6809970,18000,Medium
+Web Design,Pune,Maharashtra,3124458,16000,Medium
+Web Design,Coimbatore,Tamil Nadu,1601438,12000,Low
+Web Design,Madurai,Tamil Nadu,1017865,10000,Low
+Web Design,Jaipur,Rajasthan,3046163,13000,Medium
+Web Design,Ahmedabad,Gujarat,5570585,14000,Medium
+SEO Services,Chennai,Tamil Nadu,7088000,8000,High
+SEO Services,Mumbai,Maharashtra,20667656,12000,High
+SEO Services,Delhi,Delhi,16787941,10000,High
+SEO Services,Bangalore,Karnataka,8443675,11000,High
+SEO Services,Hyderabad,Telangana,6809970,9000,Medium
+SEO Services,Pune,Maharashtra,3124458,8500,Medium
+SEO Services,Coimbatore,Tamil Nadu,1601438,6000,Low
+SEO Services,Madurai,Tamil Nadu,1017865,5000,Low
+Digital Marketing,Chennai,Tamil Nadu,7088000,20000,High
+Digital Marketing,Mumbai,Maharashtra,20667656,30000,High
+Digital Marketing,Delhi,Delhi,16787941,25000,High
+Digital Marketing,Bangalore,Karnataka,8443675,28000,High
+Digital Marketing,Hyderabad,Telangana,6809970,22000,Medium
+App Development,Chennai,Tamil Nadu,7088000,50000,High
+App Development,Mumbai,Maharashtra,20667656,80000,High
+App Development,Bangalore,Karnataka,8443675,75000,High
+App Development,Pune,Maharashtra,3124458,60000,Medium

@@ -1,0 +1,171 @@
+{
+  "name": "Module 1 - AI Content Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{"field": "minutes", "minutesInterval": 15}]
+        }
+      },
+      "id": "node1",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "operation": "getRows",
+        "documentId": {"value": "1CP-c5D5Fa7WERhAppWe5n0KLHuR7NYU--pFLhUH8-l0", "mode": "id"},
+        "sheetName": {"value": "Sheet1", "mode": "name"},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "status",
+              "lookupValue": "pending"
+            }
+          ]
+        },
+        "options": {"returnFirstMatch": true}
+      },
+      "id": "node2",
+      "name": "Get Keyword",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [420, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {"name": "Google Sheets account"}
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {"caseSensitive": false},
+          "conditions": [
+            {
+              "leftValue": "={{ $json.keyword }}",
+              "operator": {"type": "string", "operation": "notEmpty"},
+              "rightValue": ""
+            }
+          ]
+        }
+      },
+      "id": "node3",
+      "name": "Has Keyword?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Content-Type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an SEO expert. Always respond with valid JSON only. No markdown. No extra text.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a full SEO blog article about: {{ $json.keyword }}\\n\\nRespond ONLY with this exact JSON structure:\\n{\\\"title\\\": \\\"your title here\\\", \\\"content\\\": \\\"<h2>Introduction</h2><p>paragraph here</p><h2>Section 1</h2><p>content here</p><h2>Section 2</h2><p>content here</p><h2>Conclusion</h2><p>conclusion here</p>\\\", \\\"meta_description\\\": \\\"150 char description here\\\"}\"\n    }\n  ],\n  \"max_tokens\": 2000,\n  \"temperature\": 0.7\n}"
+      },
+      "id": "node4",
+      "name": "Ask Groq AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [860, 200],
+      "credentials": {
+        "httpHeaderAuth": {"name": "Groq API"}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.first().json.choices[0].message.content;\nlet clean = raw.trim().replace(/^```json\\n?/, '').replace(/^```\\n?/, '').replace(/```$/, '').trim();\n\nlet article;\ntry {\n  article = JSON.parse(clean);\n} catch(e) {\n  article = {\n    title: 'Article: ' + $('Get Keyword').first().json.keyword,\n    content: '<p>' + clean + '</p>',\n    meta_description: $('Get Keyword').first().json.keyword\n  };\n}\n\nreturn [{\n  json: {\n    title: article.title || 'Untitled',\n    content: article.content || '<p>Content here</p>',\n    meta_description: article.meta_description || '',\n    keyword: $('Get Keyword').first().json.keyword,\n    row_number: $('Get Keyword').first().json.row_number\n  }\n}];"
+      },
+      "id": "node5",
+      "name": "Parse Article",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1080, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://keyshowprime.page.gd/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Content-Type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={\"title\": \"{{ $json.title }}\", \"content\": \"{{ $json.content }}\", \"status\": \"publish\", \"excerpt\": \"{{ $json.meta_description }}\"}"
+      },
+      "id": "node6",
+      "name": "Publish Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1300, 200],
+      "credentials": {
+        "httpBasicAuth": {"name": "WordPress Basic Auth"}
+      }
+    },
+    {
+      "parameters": {
+        "operation": "updateRow",
+        "documentId": {"value": "1CP-c5D5Fa7WERhAppWe5n0KLHuR7NYU--pFLhUH8-l0", "mode": "id"},
+        "sheetName": {"value": "Sheet1", "mode": "name"},
+        "columnToMatchOn": "keyword",
+        "valueToMatchOn": "={{ $('Get Keyword').first().json.keyword }}",
+        "columnsUi": {
+          "mappingMode": "defineBelow",
+          "values": [
+            {"column": "status", "fieldValue": "published"},
+            {"column": "published_url", "fieldValue": "={{ $json.link }}"},
+            {"column": "published_date", "fieldValue": "={{ new Date().toLocaleDateString('en-IN') }}"},
+            {"column": "article_title", "fieldValue": "={{ $('Parse Article').first().json.title }}"}
+          ]
+        }
+      },
+      "id": "node7",
+      "name": "Update Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1520, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {"name": "Google Sheets account"}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [[{"node": "Get Keyword", "type": "main", "index": 0}]]
+    },
+    "Get Keyword": {
+      "main": [[{"node": "Has Keyword?", "type": "main", "index": 0}]]
+    },
+    "Has Keyword?": {
+      "main": [
+        [{"node": "Ask Groq AI", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "Ask Groq AI": {
+      "main": [[{"node": "Parse Article", "type": "main", "index": 0}]]
+    },
+    "Parse Article": {
+      "main": [[{"node": "Publish Post", "type": "main", "index": 0}]]
+    },
+    "Publish Post": {
+      "main": [[{"node": "Update Sheet", "type": "main", "index": 0}]]
+    }
+  }
+}
